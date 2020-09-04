@@ -52,6 +52,24 @@ class Dashboard extends CI_Controller {
 			return $arr_res;
 	}
 	
+	public function loan_repayment()
+	{
+		$arr_res = array('status' => false, 'msg' => 'no data been post');
+		$post = $this->input->post();
+	
+		if(is_array($post) && sizeof($post) > 0)
+		{
+			$arr_res = $this->loan_m->manage_loan_repayment($post);
+		}
+		
+		if($this->input->is_ajax_request())
+		{
+			echo json_encode($arr_res);
+		}
+		else
+			return $arr_res;
+	}
+	
 	public function loan_listing()
 	{
 		$this->data['arr_data'] = $this->loan_m->loan_listing();

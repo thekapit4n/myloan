@@ -28,4 +28,20 @@ class Crm extends CI_Controller {
 		$this->data['arr_data'] = $this->loan_m->loan_listing();
 		$this->load->view('loan_listing_v', $this->data);
 	}
+	
+	public function manage_approval()
+	{
+		if($this->input->post())
+		{
+			$post = $this->input->post();
+			$rs = $this->loan_m->loan_approval($post);
+			
+			if($this->input->is_ajax_request())
+			{
+				echo json_encode($rs);
+			}
+			else
+				return $rs;
+		}
+	}
 }

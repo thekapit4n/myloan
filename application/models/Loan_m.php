@@ -171,7 +171,6 @@ class Loan_m extends CI_Model
 					$arr_res = array('status' => true, 'msg' => 'ok' , 'data' => array('row' => (object)$DBdata));
 				elseif($typeprocess == 'apply')
 				{
-					unset($DBdata['total_paid_forlast']);
 					$this->db->insert('loan_details', $DBdata);
 					audit_trail($this->db->last_query(), 'loan_m.php', 'manage_loan_application', 'apply loan', $this->session->userdata('username'));
 					$arr_res = array('status' => 'applied', 'msg' => 'ok');
@@ -226,7 +225,7 @@ class Loan_m extends CI_Model
 		elseif($this->session->has_userdata('usertype') && $this->session->userdata('usertype')  == 'superadmin')
 		{
 			$where = "WHERE `b`.`usertype` NOT IN ('superadmin')";
-			$sqlcount = "SELECT COUNT(`a`.`id`) AS total FROM `loan_details` AS a RIGHT JOIN `myloan_user` AS b ON `b`.`id` = `a`.`userid`" . $where;
+			$sqlcount = "SELECT COUNT(`a`.`id`) AS total FROM `loan_details` AS a INNER JOIN `myloan_user` AS b ON `b`.`id` = `a`.`userid`" . $where;
 			$query = $this->db->query($sqlcount)->row();
 			$data['total_rows'] = $query->total;
 			$config['base_url'] = base_url() . 'crm/loan_listing';
@@ -246,7 +245,7 @@ class Loan_m extends CI_Model
 				}
 			}
 
-			$sql = "SELECT `a`.*, `b`.`fullname`, `b`.`username`  FROM `loan_details` AS a RIGHT JOIN `myloan_user` AS b ON `b`.`id` = `a`.`userid`". $where . $limit;
+			$sql = "SELECT `a`.*, `b`.`fullname`, `b`.`username`  FROM `loan_details` AS a INNER JOIN `myloan_user` AS b ON `b`.`id` = `a`.`userid`". $where . $limit;
 			$query = $this->db->query($sql);
 			$data['query'] = $query->num_rows() > 0 ? $query : false;
 			if ($data['query'] != false) {
@@ -262,5 +261,122 @@ class Loan_m extends CI_Model
 		}
 		
 		return $data;
+	}
+	
+	function loan_approval($post = array())
+	{
+		$arr_res = array('status' => false, 'msg'=> 'no data post');
+		if(is_array($post) && sizeof($post) > 0)
+		{
+			$type = $post['type'];
+			$loanid = $post['id'];
+			
+			$DBdata = array(
+				'loan_status'=> trim($type),
+				'review_date'=> trim(date('Y-m-d H:i:s')),
+				'review_by'=> trim($this->session->userdata('userid')),
+			);
+			
+			$this->db->where('id', $loanid);
+			$this->db->update('loan_details', $DBdata);
+			audit_trail($this->db->last_query(), 'loan_m.php', 'loan_approval', 'Approval loan', $this->session->userdata('username'));
+			
+			if($this->db->affected_rows() > 0)
+			{
+				$arr_res = array('status' => true, 'msg'=> 'The loan has been ' . $type);
+			}
+			else
+			{
+				$arr_res = array('status' => true, 'msg'=> 'No data been update');
+			}
+		}
+		
+		return $arr_res;
+	}
+	
+	function manage_loan_repayment($post = array())
+	{
+		$arr_res = array('status' => false, 'msg'=> 'no data post');
+		if(is_array($post) && sizeof($post) > 0)
+		{
+			$loanid = $post['id'];
+			if($loanid > 0)
+			{
+				$sql = "SELECT * FROM `loan_details` WHERE `id` =  " . $this->db->escape($loanid) . " LIMIT 1";
+				$query = $this->db->query($sql);
+				
+				if($query->num_rows() > 0)
+				{
+					$row = $query->row();
+					$total_paid_by_weeks = $row->total_paid_by_weeks;
+					$total_paid_forlast = $row->total_paid_forlast;
+					$total_weeks = $row->total_weeks;
+					$current_no_weeks = $row->current_no_weeks;
+					$total_amount_loan = $row->total_amount_loan;
+					$total_paid = $row->total_paid;
+					$id = $row->id;
+					
+					$amount_to_paid = $total_paid_by_weeks;
+					if($current_no_weeks == $total_weeks)
+						$amount_to_paid = $total_paid_forlast;
+					
+					$Dbpayment = array(
+						'loanid' => trim($id),
+						'date_payment' => trim(date('Y-m-d H:i:s')),
+						'payment_amount' => trim($amount_to_paid),
+						'payment_week' => trim($current_no_weeks),
+						'payment_by' => trim($this->session->userdata('userid')),
+					);
+					
+					$this->db->insert('loan_payment_details', $Dbpayment);
+					audit_trail($this->db->last_query(), 'loan_m.php', 'manage_loan_repayment', 'Loan repayment', $this->session->userdata('username'));
+					
+					$sqlAmount = "SELECT SUM(payment_amount) as totalPaid FROM `loan_payment_details` WHERE `loanid` = " . $this->db->escape($id);
+					$q_amount = $this->db->query($sqlAmount);
+					if($q_amount->num_rows() > 0)
+					{
+						$rowPaid = $q_amount->row();
+						$currentotalpaid = $rowPaid->totalPaid;
+						$newbalance = $total_amount_loan - $currentotalpaid;
+						$newweek = $current_no_weeks + 1;
+						if($newweek > $total_weeks)
+							$newweek = $total_weeks;
+						
+						$DBloan = array(
+							'current_no_weeks' => trim($newweek),
+							'total_paid' => trim($currentotalpaid),
+							'total_balance' => trim($newbalance),
+						);
+						
+						$this->db->where('id', $loanid);
+						$this->db->update('loan_details', $DBloan);
+						audit_trail($this->db->last_query(), 'loan_m.php', 'manage_loan_repayment', 'calculate latest loan payment', $this->session->userdata('username'));
+						
+						if($this->db->affected_rows() > 0)
+						{
+							$arr_res = array('status' => true, 'msg'=> 'Payment success');
+						}
+						else
+						{
+							$arr_res = array('status' => true, 'msg'=> 'payment error');
+						}
+					}
+					else
+					{
+						$arr_res = array('status' => false, 'msg'=> 'calculation error');
+					}
+				}
+				else
+				{
+					$arr_res = array('status' => false, 'msg'=> 'loan details not exists');
+				}
+			}
+			else
+			{
+				$arr_res = array('status' => false, 'msg'=> 'loan id invalid');
+			}
+		}
+		
+		return $arr_res;
 	}
 }
