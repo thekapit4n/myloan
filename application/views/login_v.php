@@ -5,7 +5,7 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />    
 	<meta name="author" content="Haiqal halim" />    
 	<meta name="description" content="Myloan application">
-    <link rel="icon" type="image/png" href="images/favicon.png">   
+  <link rel="icon" type="image/png" href="<?php echo base_url() ?>assets/polo/images/myloan.ico">   
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!-- Document title -->
     <title>My Loan Application</title>
