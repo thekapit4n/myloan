@@ -14,16 +14,14 @@ class Dashboard extends CI_Controller {
 	public function __construct()
 	{
 		parent::__construct();
-		security_checking(); # to check session -- this function is from file application/helpers/general_helper.php. this is custom helper.
+		security_checking('user'); # to check session -- this function is from file application/helpers/general_helper.php. this is custom helper.
 		$this->load->model('loan_m');
 	}
 	
 	public function index()
 	{
 		$this->data['arr_currency'] = $this->loan_m->list_currency();
-		// ad($this->data);exit;
 		$this->load->view('dashboard_v', $this->data);
-	
 	}
 	
 	public function loan_management()

@@ -23,77 +23,113 @@
 		<div class="container">
 			<h2 class="font-weight-700"><span>Loan Listing</span></h2>
 		</div> 
-		<div class="container">
-			<div class="row">
-				<div class="col-md-12">
-					<p>
-						Displaying <?php echo (isset($starting_row) && $starting_row != '') ? $starting_row : 0 ?> 
-						to <?php echo (isset($stoping_row) && $stoping_row != '') ? $stoping_row : 0 ?> 
-						of <?php echo (isset($total_rows) && $total_rows != '') ? $total_rows : 0 ?> entries
-					</p>
+		<div class="container-fluid">
+			<div style="margin-right:5%; margin-left:5%">
+				<div class="row">
+					<div class="col-md-12">
+						<p>
+							Displaying <?php echo (isset($starting_row) && $starting_row != '') ? $starting_row : 0 ?> 
+							to <?php echo (isset($stoping_row) && $stoping_row != '') ? $stoping_row : 0 ?> 
+							of <?php echo (isset($total_rows) && $total_rows != '') ? $total_rows : 0 ?> entries
+						</p>
+					</div>
 				</div>
-			</div>
-			<div class="row">
-				<div class="table-responsive">
-					<table class="table table-bordered nobottommargin">
-						<thead>
-							<tr>
-								<th>#</th>
-								<th>Total Loan Amount</th>
-								<th>Currency Description</th>
-								<th>Loan terms</th>
-								<th>Total Weeks</th>
-								<th>Start Date Loan</th>
-								<th>End Date Loan</th>
-								<th>Loan Status</th>
-								<th>Total Paid</th>
-								<th>Total Balance</th>
-								<th>Action</th>
-							</tr>
-						</thead>
-						<tbody>
-							<?php 
-								if(isset($query) && is_object($query) && $query->num_rows() > 0)
-								{
-									
-									foreach($query->result() as $rowloan)
-									{
+				<div class="row">
+					<div class="table-responsive">
+						<table class="table table-bordered nobottommargin">
+							<thead>
+								<tr>
+									<th>#</th>
+									<?php 
+										if($this->session->has_userdata('usertype') && $this->session->userdata('usertype') == 'superadmin')
+										{
+										?>
+											<th>Fullname Applicant</th>
+										<?php
+										}
 									?>
-										<tr>
-											<td><?php echo ++$count ?></td>
-											<td><?php echo $rowloan->currency . " " . number_format($rowloan->total_amount_loan,2) ?></td>
-											<td><?php echo $rowloan->currency_desc ?></td>
-											<td><?php echo $rowloan->loan_terms . " " . $rowloan->loan_terms_types ?></td>
-											<td><?php echo $rowloan->total_weeks  ?></td>
-											<td><?php echo date('d/m/Y', strtotime($rowloan->start_date_loan))  ?></td>
-											<td><?php echo date('d/m/Y', strtotime($rowloan->end_date_loan))  ?></td>
-											<td><?php echo $rowloan->loan_status  ?></td>
-											<td><?php echo $rowloan->currency . " " . number_format($rowloan->total_paid,2) ?></td>
-											<td><?php echo $rowloan->currency . " " . number_format($rowloan->total_balance,2) ?></td>
-											<td><button type="button" class="btn btn-sm btn-info">Pay</button></td>
-										</tr>
-									<?php
+									<th>Total Loan Amount</th>
+									<th>Currency Description</th>
+									<th>Loan terms</th>
+									<th>Total Weeks</th>
+									<th>Start Date Loan</th>
+									<th>End Date Loan</th>
+									<th>Loan Status</th>
+									<th class="text-center">Total Paid</th>
+									<th class="text-center">Total Balance</th>
+									<th class="text-center">Action</th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php 
+									if(isset($query) && is_object($query) && $query->num_rows() > 0)
+									{
+										foreach($query->result() as $rowloan)
+										{
+										?>
+											<tr>
+												<td><?php echo ++$count ?></td>
+												<?php 
+													if($this->session->has_userdata('usertype') && $this->session->userdata('usertype') == 'superadmin')
+													{
+													?>
+														<th><?php echo $rowloan->fullname ?></th>
+													<?php
+													}
+												?>
+												<td><?php echo $rowloan->currency . " " . number_format($rowloan->total_amount_loan,2) ?></td>
+												<td><?php echo $rowloan->currency_desc ?></td>
+												<td><?php echo $rowloan->loan_terms . " " . $rowloan->loan_terms_types ?></td>
+												<td><?php echo $rowloan->total_weeks  ?></td>
+												<td><?php echo date('d/m/Y', strtotime($rowloan->start_date_loan))  ?></td>
+												<td><?php echo date('d/m/Y', strtotime($rowloan->end_date_loan))  ?></td>
+												<td><?php echo $rowloan->loan_status  ?></td>
+												<td class="text-right"><?php echo $rowloan->currency . " " . number_format($rowloan->total_paid,2) ?></td>
+												<td class="text-right"><?php echo $rowloan->currency . " " . number_format($rowloan->total_balance,2) ?></td>
+												<td>
+													<?php 
+														if($this->session->has_userdata('usertype') && $this->session->userdata('usertype') == 'superadmin' && strtolower($rowloan->loan_status) == 'pending')
+														{
+														?>
+															<button type="button" class="btn btn-sm btn-success">Approve</button>
+															<button type="button" class="btn btn-sm btn-danger">Disapprove</button>
+														<?php
+														}
+														elseif($this->session->has_userdata('usertype') && $this->session->userdata('usertype') == 'user')
+														{
+															if(strtolower($rowloan->loan_status) == 'approve')
+															{
+															?>
+																<button type="button" class="btn btn-sm btn-info">Pay</button>
+															<?php
+															}
+														}
+													?>
+												</td>
+											</tr>
+										<?php
+										}
 									}
-								}
-							?>
-						</tbody>
-					</table>
+								?>
+							</tbody>
+						</table>
+					</div>
 				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-12">
-					<p>
-						Displaying <?php echo (isset($starting_row) && $starting_row != '') ? $starting_row : 0 ?> 
-						to <?php echo (isset($stoping_row) && $stoping_row != '') ? $stoping_row : 0 ?> 
-						of <?php echo (isset($total_rows) && $total_rows != '') ? $total_rows : 0 ?> entries
-					</p>
+				<div class="row">
+					<div class="col-md-12">
+						<p>
+							Displaying <?php echo (isset($starting_row) && $starting_row != '') ? $starting_row : 0 ?> 
+							to <?php echo (isset($stoping_row) && $stoping_row != '') ? $stoping_row : 0 ?> 
+							of <?php echo (isset($total_rows) && $total_rows != '') ? $total_rows : 0 ?> entries
+						</p>
+					</div>
 				</div>
-			</div>
-			<div class="row">
-				<div class="col-md-8">
-					<?php 
-						echo (isset($pagination) && $pagination != '') ? $pagination : '' 
-					?>
+				<div class="row">
+					<div class="col-md-8">
+						<?php 
+							echo (isset($pagination) && $pagination != '') ? $pagination : '' 
+						?>
+					</div>
 				</div>
 			</div>
 		</div>

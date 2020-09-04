@@ -37,8 +37,21 @@
                         <div class="container">
                             <nav>
                                 <ul>
-                                    <li><a href="<?php echo base_url() ?>dashboard/">Home</a></li>
-                                    <li><a href="<?php echo base_url() ?>dashboard/loan_listing">My Loan</a></li>
+									<?php
+									if($this->session->has_userdata('usertype') && $this->session->userdata('usertype') == 'superadmin')
+									{
+									?>
+										<li><a href="<?php echo base_url() ?>crm/loan_listing">Manage Loan</a></li>
+									<?php
+									}
+									elseif($this->session->has_userdata('usertype') && $this->session->userdata('usertype') == 'user')
+									{
+									?>
+										<li><a href="<?php echo base_url() ?>dashboard/">Home</a></li>
+										<li><a href="<?php echo base_url() ?>dashboard/loan_listing">My Loan</a></li>
+									<?php
+									}
+									?>
                                     <li><a href="<?php echo base_url() ?>login/sayonara">Log Out</a></li>
                                 </ul>
                             </nav>

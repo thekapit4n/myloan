@@ -49,8 +49,8 @@ class Login extends CI_Controller {
 			{
 				if($this->session->userdata('usertype') == 'user')
 					redirect('dashboard/');
-				else
-					echo "indevelopment";
+				elseif($this->session->userdata('usertype') == 'superadmin')
+					redirect('crm/');
 			}
 		}
 	}

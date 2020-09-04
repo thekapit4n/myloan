@@ -128,13 +128,11 @@ if(!function_exists("security_checking")) {
 			if($found == true AND $obj->session->userdata('logged_in') == true)
 				return true;
 			else  {
-				// if($found == FALSE)
-					// $obj->session->userdata('redirect_login', 'home');
-				// else 
-					// $obj->session->userdata('redirect_login', $_SERVER['REQUEST_URI']);
-				
 				if($obj->session->userdata('logged_in') == true){
-					redirect('dashboard/');
+					if($obj->session->userdata('usertype') == 'user')
+						redirect('dashboard/');
+					elseif($obj->session->userdata('usertype') == 'superadmin')
+						redirect('crm/');
 				}
 				else
 					redirect('login/sayonara');

@@ -15,7 +15,7 @@ class Loan_m extends CI_Model
 	function __construct()
 	{
 		parent::__construct();
-		$this->default_per_page = 3;
+		$this->default_per_page = 25;
 	}
 
 	public function list_currency()
@@ -211,6 +211,43 @@ class Loan_m extends CI_Model
 			$sql = "SELECT * FROM `loan_details` WHERE `userid` = " . $this->db->escape($this->session->userdata('userid')) . $limit;
 			$query = $this->db->query($sql);
 
+			$data['query'] = $query->num_rows() > 0 ? $query : false;
+			if ($data['query'] != false) {
+				$start_form  = $this->uri->segment($config['uri_segment']);
+				$data['starting_row'] = $data['query']->num_rows() > 0 ? $start_form + 1 : 0;
+				$data['stoping_row'] = $start_form + $data['query']->num_rows();
+			}
+
+			if ($data['total_rows'] == 0) {
+				$data['starting_row'] = 0;
+				$data['stoping_row'] = 0;
+			}
+		}
+		elseif($this->session->has_userdata('usertype') && $this->session->userdata('usertype')  == 'superadmin')
+		{
+			$where = "WHERE `b`.`usertype` NOT IN ('superadmin')";
+			$sqlcount = "SELECT COUNT(`a`.`id`) AS total FROM `loan_details` AS a RIGHT JOIN `myloan_user` AS b ON `b`.`id` = `a`.`userid`" . $where;
+			$query = $this->db->query($sqlcount)->row();
+			$data['total_rows'] = $query->total;
+			$config['base_url'] = base_url() . 'crm/loan_listing';
+			$config['uri_segment'] = 3;
+			$config['total_rows'] = $data['total_rows'];
+			$config['per_page'] = $this->default_per_page;
+			
+			$this->pagination->initialize($config);
+			$data['pagination'] = $this->pagination->create_links();
+
+			$limit = '';
+			if ($data['total_rows'] > 0) {
+				if ($this->uri->segment($config['uri_segment']) && is_numeric($this->uri->segment($config['uri_segment']))) {
+					$limit = ' LIMIT ' . $this->uri->segment($config['uri_segment']) . ', ' . $config['per_page'];
+				} else {
+					$limit = ' LIMIT 0, ' . $config['per_page'];
+				}
+			}
+
+			$sql = "SELECT `a`.*, `b`.`fullname`, `b`.`username`  FROM `loan_details` AS a RIGHT JOIN `myloan_user` AS b ON `b`.`id` = `a`.`userid`". $where . $limit;
+			$query = $this->db->query($sql);
 			$data['query'] = $query->num_rows() > 0 ? $query : false;
 			if ($data['query'] != false) {
 				$start_form  = $this->uri->segment($config['uri_segment']);
