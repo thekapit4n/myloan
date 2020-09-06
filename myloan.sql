@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 04, 2020 at 06:25 PM
+-- Generation Time: Sep 06, 2020 at 12:07 PM
 -- Server version: 10.4.14-MariaDB
 -- PHP Version: 7.4.9
 
@@ -117,7 +117,7 @@ CREATE TABLE `myloan_user` (
 --
 
 INSERT INTO `myloan_user` (`id`, `fullname`, `username`, `usertype`, `password`, `created_date`, `updated_date`, `updated_by`) VALUES
-(1, 'Admin Myloan', 'admin', 'superadmin', '0192023a7bbd73250516f069df18b500', '2020-09-03 00:10:26', '0000-00-00 00:00:00', ''),
+(1, 'Admin Myloan', 'admin', 'superadmin', 'e8c72885863e11f9eccd6d3a6c12e958', '2020-09-03 00:10:26', '0000-00-00 00:00:00', ''),
 (2, 'Haiqal halim', 'thekapitan', 'user', '5445bd81bcc908c271b5c6f0368c7942', '2020-09-02 18:52:32', '0000-00-00 00:00:00', ''),
 (3, 'tester user 1', 'tester1', 'user', '3bb18e2a9895656f7318fa9540313a82', '2020-09-04 18:23:37', '0000-00-00 00:00:00', '');
 
