@@ -41,4 +41,4 @@ This is simple system will calculate amount to be paid by weekly basis based on 
 - **Admin/Management**
   - There are admin info for login and test:
     - Username : admin
-    - Password : admin123
+    - Password : @Dmin123
